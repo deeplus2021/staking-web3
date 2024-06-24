@@ -17,30 +17,30 @@ export const Liquidity = () => {
   const { address, chainId, isConnected } = useWeb3ModalAccount();
   const { walletProvider } = useWeb3ModalProvider();
 
-  const [ decimals, setDecimals ] = useState(0);
-  const [ symbol, setSymbol ] = useState('');
+  const [decimals, setDecimals] = useState(0);
+  const [symbol, setSymbol] = useState('');
 
-  const [ liquidityContractOwner, setLiquidityContractOwner ] = useState('');
-  const [ depositStart, setDepositStart ] = useState('');
-  const [ updateDepositStart, setUpdateDepositStart ] = useState('');
-  const [ updateRewardStartDate, setUpdateRewardStartDate ] = useState('');
-  const [ updateRewardPeriod, setUpdateRewardPeriod ] = useState('');
-  const [ updateRewardTotalAmount, setUpdateRewardTotalAmount ] = useState('');
-  const [ rewardStartDate, setRewardStartDate ] = useState('');
-  const [ rewardPeriod, setRewardPeriod ] = useState('');
-  const [ rewardTotalAmount, setRewardTotalAmount ] = useState('');
-  const [ claimableRewardAmount, setClaimableRewardAmount ] = useState('');
-  const [ listedTime, setListedTime ] = useState('');
+  const [liquidityContractOwner, setLiquidityContractOwner] = useState('');
+  const [depositStart, setDepositStart] = useState('');
+  const [updateDepositStart, setUpdateDepositStart] = useState('');
+  const [updateRewardStartDate, setUpdateRewardStartDate] = useState('');
+  const [updateRewardPeriod, setUpdateRewardPeriod] = useState('');
+  const [updateRewardTotalAmount, setUpdateRewardTotalAmount] = useState('');
+  const [rewardStartDate, setRewardStartDate] = useState('');
+  const [rewardPeriod, setRewardPeriod] = useState('');
+  const [rewardTotalAmount, setRewardTotalAmount] = useState('');
+  const [claimableRewardAmount, setClaimableRewardAmount] = useState('');
+  const [listedTime, setListedTime] = useState('');
 
-  const [ depositAmount, setDepositAmount ] = useState('');
-  const [ totalDepositAmount, setTotalDepositAmount ] = useState('');
-  const [ userDepositsArray, setUserDepositsArray ] = useState([]);
-  const [ totalDeposits, setTotalDeposits ] = useState(0);
-  const [ claimingTokenBalance, setClaimingTokenBalance ] = useState(0);
-  const [ pairAddress, setPairAddress ] = useState('');
-  const [ addLiquidityETHAmount, setAddLiquidityETHAmount ] = useState('');
-  const [ addLiquidityTokenAmount, setAddLiquidityTokenAmount ] = useState('');
-  const [ tokenBalance, setTokenBalance ] = useState('');
+  const [depositAmount, setDepositAmount] = useState('');
+  const [totalDepositAmount, setTotalDepositAmount] = useState('');
+  const [userDepositsArray, setUserDepositsArray] = useState([]);
+  const [totalDeposits, setTotalDeposits] = useState(0);
+  const [claimingTokenBalance, setClaimingTokenBalance] = useState(0);
+  const [pairAddress, setPairAddress] = useState('');
+  const [addLiquidityETHAmount, setAddLiquidityETHAmount] = useState('');
+  const [addLiquidityTokenAmount, setAddLiquidityTokenAmount] = useState('');
+  const [tokenBalance, setTokenBalance] = useState('');
 
   // get staking enabled status, token decimals
   useEffect(() => {
@@ -78,7 +78,7 @@ export const Liquidity = () => {
     setDecimals(tokenDecimals);
     setSymbol(symbol);
   }
-  
+
   async function getTokenBalance() {
     if (!isConnected) return;
     const ethersProvider = new BrowserProvider(walletProvider);
@@ -96,7 +96,7 @@ export const Liquidity = () => {
 
     const LiquidityContract = new Contract(LiquidityAddress, LiquidityJSON.abi, signer);
     const depositStart = await LiquidityContract.depositStart();
-    
+
     setDepositStart(depositStart);
   }
 
@@ -112,7 +112,7 @@ export const Liquidity = () => {
 
   async function updateDepositStartDate() {
     const data = Math.floor(new Date(updateDepositStart).getTime() / 1000);
-    
+
     const ethersProvider = new BrowserProvider(walletProvider);
     const signer = await ethersProvider.getSigner();
 
@@ -177,7 +177,7 @@ export const Liquidity = () => {
 
     try {
       const total = await LiquidityContract.totalDeposits();
-      
+
       setTotalDeposits(formatUnits(total));
     } catch (error) {
       let message = error;
@@ -270,7 +270,7 @@ export const Liquidity = () => {
 
   async function setRewardStates() {
     const startDate = Math.floor(new Date(updateRewardStartDate).getTime() / 1000);
-    
+
     const ethersProvider = new BrowserProvider(walletProvider);
     const signer = await ethersProvider.getSigner();
 
@@ -403,17 +403,22 @@ export const Liquidity = () => {
       const TokenContract = new Contract(TokenAddress, TokenJSON.abi, signer);
       const LiquidityContract = new Contract(LiquidityAddress, LiquidityJSON.abi, signer);
       const amount = parseUnits(String(addLiquidityTokenAmount), decimals);
-      await TokenContract.approve(LiquidityAddress, amount);
-      const trx = await LiquidityContract.addLiquidity(amount, {
-        value: parseEther(addLiquidityETHAmount)
-      });
+      const trx = await TokenContract.approve(LiquidityAddress, amount);
 
       trx.wait().then(async receipt => {
-        if (receipt && receipt.status == 1) {
-          getUserDepositsArray();
-          getTotalDepositAmount();
-          getClaimableRewardAmount();
-          getTokenBalance();
+        if (receipt && receipt.status) {
+          const trx2 = await LiquidityContract.addLiquidity(amount, {
+            value: parseEther(addLiquidityETHAmount)
+          });
+
+          trx2.wait().then(async receipt2 => {
+            if (receipt2 && receipt2.status == 1) {
+              getUserDepositsArray();
+              getTotalDepositAmount();
+              getClaimableRewardAmount();
+              getTokenBalance();
+            }
+          });
         }
       });
     } catch (error) {
@@ -448,22 +453,22 @@ export const Liquidity = () => {
 
     x = new Date(Number(x) * 1000);
     const date = x.getDate().toString().padStart(2, 0);
-    const month = (x.getMonth()+1).toString().padStart(2, 0);
+    const month = (x.getMonth() + 1).toString().padStart(2, 0);
     const year = x.getFullYear().toString();
 
     const hours = x.getHours().toString().padStart(2, 0);
     const minutes = x.getMinutes().toString().padStart(2, 0);
     const seconds = x.getSeconds().toString().padStart(2, 0);
-    return [date, month, year].join('/') + ' '+ [hours, minutes, seconds].join(':');
+    return [date, month, year].join('/') + ' ' + [hours, minutes, seconds].join(':');
   }
 
-  return(
+  return (
     <main className="py-12 px-24">
       <div>
         <div className='flex items-center'>
-          <div className={(depositStarted() ? `bg-green-800`:`bg-red-800`)+` rounded-full w-4 h-4 mr-3`}></div>
-            { depositStarted() ? <span className="text-lg font-bold">Deposit is enabled.</span> : <span className="text-lg font-bold">Deposit is Disabled</span> }
-            <span className="mx-4">|</span>
+          <div className={(depositStarted() ? `bg-green-800` : `bg-red-800`) + ` rounded-full w-4 h-4 mr-3`}></div>
+          {depositStarted() ? <span className="text-lg font-bold">Deposit is enabled.</span> : <span className="text-lg font-bold">Deposit is Disabled</span>}
+          <span className="mx-4">|</span>
           <div>Deposit is available from: <span className="font-bold">{convertDate(depositStart)}</span></div>
         </div>
         <div className='flex items-center mt-4'>
@@ -474,7 +479,7 @@ export const Liquidity = () => {
             <label className="block mb-2 text-sm font-medium text-gray-900">Deposit Amount</label>
             <div className='flex'>
               <input
-                type = "number"
+                type="number"
                 className="block w-64 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-base focus:ring-blue-500 focus:border-blue-500"
                 onChange={e => setDepositAmount(e.target.value)}
                 placeholder='Enter the amount of ETH to deposit'
@@ -511,19 +516,19 @@ export const Liquidity = () => {
                   return (
                     <tr className="bg-white border-b text-center font-medium text-gray-900 whitespace-nowrap" key={index}>
                       <td className="px-6 py-3">
-                        { index + 1 }
+                        {index + 1}
                       </td>
                       <td className="px-6 py-3">
-                        { formatUnits(item.amount, decimals) } ETH
+                        {formatUnits(item.amount, decimals)} ETH
                       </td>
                       <td className="px-6 py-3">
-                        { convertDate(item.depositOn) }
+                        {convertDate(item.depositOn)}
                       </td>
                       <td className="px-6 py-3">
-                        { formatUnits(item.liquidity, 18) } UNI-V2
+                        {formatUnits(item.liquidity, 18)} UNI-V2
                       </td>
                       <td className="px-6 py-3">
-                        { item.removed ? <span className="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Removed</span> : <span className="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Active</span> }
+                        {item.removed ? <span className="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Removed</span> : <span className="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Active</span>}
                       </td>
                       <td className="px-6 py-3">
                         {
@@ -543,8 +548,8 @@ export const Liquidity = () => {
       <hr className="my-5" />
       <div>
         <div className='flex items-center'>
-          <div className={(listedTime ? `bg-green-800`:`bg-red-800`)+` rounded-full w-4 h-4 mr-3`}></div>
-          { listedTime ? <span className="text-lg font-bold">Liquidity was listed at {convertDate(listedTime)}.</span> : <span className="text-lg font-bold">Liquidity isn't listed yet</span> }
+          <div className={(listedTime ? `bg-green-800` : `bg-red-800`) + ` rounded-full w-4 h-4 mr-3`}></div>
+          {listedTime ? <span className="text-lg font-bold">Liquidity was listed at {convertDate(listedTime)}.</span> : <span className="text-lg font-bold">Liquidity isn't listed yet</span>}
         </div>
         <div className='mt-4'>Token Balance: <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 ml-2">{tokenBalance} {symbol}</span></div>
         <div className='flex mt-4'>
@@ -552,13 +557,13 @@ export const Liquidity = () => {
             <label className="block mb-2 text-sm font-medium text-gray-900">Add liquidity amount</label>
             <div className='flex'>
               <input
-                type = "number"
+                type="number"
                 className="block w-48 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-base focus:ring-blue-500 focus:border-blue-500"
                 onChange={e => setAddLiquidityETHAmount(e.target.value)}
                 placeholder='ETH amount to add liquidity'
               />
               <input
-                type = "number"
+                type="number"
                 className="block w-48 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-base focus:ring-blue-500 focus:border-blue-500 ml-2"
                 onChange={e => setAddLiquidityTokenAmount(e.target.value)}
                 placeholder='Token amount to add liquidity'
@@ -571,8 +576,8 @@ export const Liquidity = () => {
       <hr className="my-5" />
       <div>
         <div className='flex items-center'>
-          <div className={(rewardPeriodStarted() ? `bg-green-800`:`bg-red-800`)+` rounded-full w-4 h-4 mr-3`}></div>
-          { rewardPeriodStarted() ? <span className="text-lg font-bold">Reward period is started.</span> : <span className="text-lg font-bold">Reward isn't started</span> }
+          <div className={(rewardPeriodStarted() ? `bg-green-800` : `bg-red-800`) + ` rounded-full w-4 h-4 mr-3`}></div>
+          {rewardPeriodStarted() ? <span className="text-lg font-bold">Reward period is started.</span> : <span className="text-lg font-bold">Reward isn't started</span>}
         </div>
         <div className='mt-3'>Reward period starts from: <span className="font-bold">{convertDate(rewardStartDate)}</span></div>
         <div className='mt-3'>Reward period ends at: <span className="font-bold">{convertDate(rewardStartDate + 86400 * Number(rewardPeriod))}</span></div>
@@ -644,7 +649,7 @@ export const Liquidity = () => {
               <button type="button" className="text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-md px-4 py-2.5 text-center ml-2" onClick={listLiquidity}>List Liquidity</button>
             </div>
           </>
-        ): <></>
+        ) : <></>
       }
     </main>
   )
