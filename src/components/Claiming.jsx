@@ -435,7 +435,8 @@ export const Claiming = () => {
     if (remain == 0) return 'End';
     const remainDays = Math.floor(remain / 86400);
     const remainHours = Math.floor((remain - remainDays * 86400) / 3600);
-    return (remainHours > 0 ? `${remainDays} days ` : '') + `${remainHours} hours`;
+    if (remainDays == 0 && remainHours == 0) return 'Less than 1 hour';
+    return (remainDays > 0 ? `${remainDays} days ` : '') + (remainHours > 0 ? `${remainHours} hours` : '');
   }
 
   function getDurationMonth(item) {
