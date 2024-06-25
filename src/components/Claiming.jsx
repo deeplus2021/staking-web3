@@ -165,12 +165,11 @@ export const Claiming = () => {
 
     const ethersProvider = new BrowserProvider(walletProvider);
     const signer = await ethersProvider.getSigner();
-    const DECIMAL = Math.pow(Number(10), Number(decimals));
-    let amount = Number(claimAmount) * DECIMAL;
+    const amount = parseUnits(String(claimAmount), decimals);
 
     try {
       const ClaimingContract = new Contract(ClaimingAddress, ClaimingJSON.abi, signer);
-      const trx = await ClaimingContract.claim(address, amount.toString());
+      const trx = await ClaimingContract.claim(address, amount);
 
       trx.wait().then(async receipt => {
         if (receipt && receipt.status == 1) {
