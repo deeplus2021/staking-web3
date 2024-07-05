@@ -214,12 +214,11 @@ export const Claiming = () => {
 
     const ethersProvider = new BrowserProvider(walletProvider);
     const signer = await ethersProvider.getSigner();
-    const DECIMAL = Math.pow(Number(10), Number(decimals));
-    let amount = Number(stakeFromClaimingAmount) * DECIMAL;
+    let amount = parseUnits(String(stakeFromClaimingAmount), Number(decimals));
 
     try {
       const ClaimingContract = new Contract(ClaimingAddress, ClaimingJSON.abi, signer);
-      const trx = await ClaimingContract.stake(amount.toString(), durationFromClaiming);
+      const trx = await ClaimingContract.stake(amount, durationFromClaiming);
 
       trx.wait().then(async receipt => {
         if (receipt && receipt.status == 1) {
@@ -269,14 +268,13 @@ export const Claiming = () => {
     try {
       const TokenContract = new Contract(TokenAddress, TokenJSON.abi, signer);
       const StakingContract = new Contract(StakingAddress, StakingJSON.abi, signer);
-      const DECIMAL = Math.pow(Number(10), Number(decimals));
-      amount = Number(stakeAmount) * DECIMAL;
+      amount = parseUnits(String(stakeAmount), Number(decimals));
 
-      const trx = await TokenContract.approve(StakingAddress, amount.toString());
+      const trx = await TokenContract.approve(StakingAddress, amount);
 
       trx.wait().then(async receipt => {
         if (receipt && receipt.status) {
-          const trx2 = await StakingContract.stake(amount.toString(), duration);
+          const trx2 = await StakingContract.stake(amount, duration);
           trx2.wait().then(async receipt2 => {
             if (receipt2 && receipt2.status) {
               getTokenBalance();

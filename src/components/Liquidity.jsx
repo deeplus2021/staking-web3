@@ -281,8 +281,6 @@ export const Liquidity = () => {
 
     try {
       const LiquidityContract = new Contract(LiquidityAddress, LiquidityJSON.abi, signer);
-      const DECIMAL = Math.pow(Number(10), Number(decimals));
-      let amount = Number(updateRewardTotalAmount) * DECIMAL;
       const trx = await LiquidityContract.setRewardStates(startDate, updateRewardPeriod, parseUnits(updateRewardTotalAmount, decimals));
 
       trx.wait().then(async receipt => {
