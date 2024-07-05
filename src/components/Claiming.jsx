@@ -9,10 +9,15 @@ import { shortenAddress } from '../utils';
 
 console.log(process.env.REACT_APP_BACKEND_ENDPOINT);
 
-const TokenAddress = '0xE7981188f8D10DAB0aba03C1974E496CE83E2876';
-const StakingAddress = '0xe5f438191cA1C051373239748BF8E0cd55155A3E';
-const ClaimingAddress = '0xE097A30Ba2c5737e0d9b73603e91c600DBf4a8Dc';
-const LiquidityAddress = '0x2DEadC133aAA4c30D95FDA4C2Bb003E673487F94';
+// const TokenAddress = '0xE7981188f8D10DAB0aba03C1974E496CE83E2876';
+// const StakingAddress = '0xe5f438191cA1C051373239748BF8E0cd55155A3E';
+// const ClaimingAddress = '0xE097A30Ba2c5737e0d9b73603e91c600DBf4a8Dc';
+// const LiquidityAddress = '0x2DEadC133aAA4c30D95FDA4C2Bb003E673487F94';
+
+const TokenAddress = '0x454739D35c569992e3872dFa962A464ABdFcBcB8';
+const StakingAddress = '0x22Be234260fa47E76511aFbe3644ac326555a51E';
+const ClaimingAddress = '0x42ce13195843d430E20E80dF766427ea96857610';
+const LiquidityAddress = '0x120E0863F9e46Fa64a6287AC3f8940AaF8Ad340c';
 
 export const Claiming = () => {
   const { address, chainId, isConnected } = useWeb3ModalAccount();
@@ -27,6 +32,8 @@ export const Claiming = () => {
   const [claimInfoAmount, setClaimInfoAmount] = useState('');
   const [claimInfoAddress, setClaimInfoAddress] = useState('');
   const [claimAmount, setClaimAmount] = useState('');
+  const [claimRemainAmount, setClaimRemainAmount] = useState('');
+  const [claimTotalAmount, setClaimTotalAmount] = useState('');
   const [claimableAmount, setClaimableAmount] = useState('');
   const [stakeFromClaimingAmount, setStakeFromClaimingAmount] = useState('');
   const [durationFromClaiming, setDurationFromClaiming] = useState('');
@@ -65,7 +72,7 @@ export const Claiming = () => {
     if (!isConnected) return;
 
     getTokenBalance();
-    getClaimableAmount();
+    getClaimInfo();
   }, [isConnected, address, decimals]);
 
   async function getTokenDecimals() {
@@ -79,12 +86,15 @@ export const Claiming = () => {
     setSymbol(symbol);
   }
 
-  async function getClaimableAmount() {
+  async function getClaimInfo() {
     const ethersProvider = new BrowserProvider(walletProvider);
     const signer = await ethersProvider.getSigner();
 
     const ClaimingContract = new Contract(ClaimingAddress, ClaimingJSON.abi, signer);
     const amount = await ClaimingContract.getClaimableAmount(address);
+    const returns = await ClaimingContract.getClaimInfo(address);
+    setClaimRemainAmount(formatUnits(returns.remain, decimals));
+    setClaimTotalAmount(formatUnits(returns.amount, decimals));
     setClaimableAmount(formatUnits(amount, decimals));
   }
 
@@ -173,7 +183,7 @@ export const Claiming = () => {
 
       trx.wait().then(async receipt => {
         if (receipt && receipt.status == 1) {
-          getClaimableAmount();
+          getClaimInfo();
           getTokenBalance();
         }
       })
@@ -213,7 +223,7 @@ export const Claiming = () => {
 
       trx.wait().then(async receipt => {
         if (receipt && receipt.status == 1) {
-          getClaimableAmount();
+          getClaimInfo();
           getStakingArray();
 
           const data = {
@@ -373,7 +383,7 @@ export const Claiming = () => {
 
       trx.wait().then(async receipt => {
         if (receipt && receipt.status == 1) {
-          getClaimableAmount();
+          getClaimInfo();
         }
       });
     } catch (error) {
@@ -474,8 +484,10 @@ export const Claiming = () => {
           <span className="mx-4">|</span>
           <div>Claiming is available from: <span className="font-bold">{convertDate(claimStart)}</span></div>
         </div>
-        <div className='flex items-center mt-4'>
-          <div>Claimable Amount: <span className="font-bold">{claimableAmount}</span> {symbol}</div>
+        <div className='items-center mt-4'>
+          <div>Total Claim Amount: <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 ml-2">{claimTotalAmount} {symbol}</span></div>
+          <div>Remain Claim Amount: <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 ml-2">{claimRemainAmount} {symbol}</span></div>
+          <div>Claimable Amount: <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300 ml-2">{claimableAmount} {symbol}</span></div>
         </div>
         <div className='flex mt-4'>
           <div>
