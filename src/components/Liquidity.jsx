@@ -305,7 +305,7 @@ export const Liquidity = () => {
 
     try {
       const LiquidityContract = new Contract(LiquidityAddress, LiquidityJSON.abi, signer);
-      const trx = await LiquidityContract.callStatic.depositETH({
+      const trx = await LiquidityContract.depositETH({
         value: parseEther(depositAmount)
       });
 
