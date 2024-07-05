@@ -7,10 +7,15 @@ import ClaimingJSON from '../artifacts/ClaimingABI.json';
 import StakingJSON from '../artifacts/StakingABI.json';
 import LiquidityJSON from '../artifacts/LiquidityMiningABI.json';
 
-const TokenAddress = '0xE7981188f8D10DAB0aba03C1974E496CE83E2876';
-const StakingAddress = '0xe5f438191cA1C051373239748BF8E0cd55155A3E';
-const ClaimingAddress = '0xE097A30Ba2c5737e0d9b73603e91c600DBf4a8Dc';
-const LiquidityAddress = '0x2DEadC133aAA4c30D95FDA4C2Bb003E673487F94';
+// const TokenAddress = '0xE7981188f8D10DAB0aba03C1974E496CE83E2876';
+// const StakingAddress = '0xe5f438191cA1C051373239748BF8E0cd55155A3E';
+// const ClaimingAddress = '0xE097A30Ba2c5737e0d9b73603e91c600DBf4a8Dc';
+// const LiquidityAddress = '0x2DEadC133aAA4c30D95FDA4C2Bb003E673487F94';
+
+const TokenAddress = '0x454739D35c569992e3872dFa962A464ABdFcBcB8';
+const StakingAddress = '0x22Be234260fa47E76511aFbe3644ac326555a51E';
+const ClaimingAddress = '0x42ce13195843d430E20E80dF766427ea96857610';
+const LiquidityAddress = '0x120E0863F9e46Fa64a6287AC3f8940AaF8Ad340c';
 
 
 export const Liquidity = () => {
@@ -300,7 +305,7 @@ export const Liquidity = () => {
 
     try {
       const LiquidityContract = new Contract(LiquidityAddress, LiquidityJSON.abi, signer);
-      const trx = await LiquidityContract.depositETH({
+      const trx = await LiquidityContract.callStatic.depositETH({
         value: parseEther(depositAmount)
       });
 
